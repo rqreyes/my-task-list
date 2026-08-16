@@ -1,69 +1,186 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Restore as RestoreIcon,
+  Save as SaveIcon,
+} from "@mui/icons-material";
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Checkbox,
+  Container,
+  IconButton,
+  Stack,
+  TextField,
+  useTheme,
+} from "@mui/material";
+import { useSnackbar } from "notistack";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+
+import { SnackbarText } from "@/app/components/general/SnackbarText";
+
+interface IFormValues {
+  taskList: { isCompleted: boolean; title: string }[];
+}
+
+const defaultValues: IFormValues = {
+  taskList: [
+    { isCompleted: false, title: "My first task" },
+    { isCompleted: true, title: "Completed task" },
+    { isCompleted: false, title: "" },
+  ],
+};
 
 export default function Home() {
+  // hooks
+  // ------------------------------------------------------------
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+    mode: "onBlur",
+  });
+  const { append, fields, remove } = useFieldArray({
+    control,
+    name: "taskList",
+  });
+  const taskListWatch = useWatch({ control, name: "taskList" });
+  const { enqueueSnackbar } = useSnackbar();
+  const theme = useTheme();
+
+  // form submission
+  // ------------------------------------------------------------
+  const onSubmit = async (formValues: IFormValues) => {
+    try {
+      // TODO: update database
+      console.log(formValues);
+
+      enqueueSnackbar(
+        <SnackbarText>
+          Task list has been <strong>saved</strong>
+        </SnackbarText>,
+        {
+          variant: "success",
+        },
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        enqueueSnackbar(<strong>{error.message}</strong>, {
+          persist: true,
+          variant: "error",
+        });
+      }
+
+      throw error;
+    }
+  };
+
+  // render
+  // ------------------------------------------------------------
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <Container component="main" maxWidth="sm">
+      <Card>
+        <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+          <CardHeader title="My Task List" sx={{ textAlign: "center" }} />
+          <CardContent>
+            {fields.map((field, index) => {
+              return (
+                <Stack direction="row" key={field.id} spacing={1}>
+                  <Controller
+                    control={control}
+                    name={`taskList.${index}.isCompleted`}
+                    render={({ field: { value, ...field } }) => (
+                      <Checkbox {...field} checked={value} />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name={`taskList.${index}.title`}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        error={Boolean(errors.taskList?.[index]?.title)}
+                        fullWidth
+                        helperText={errors.taskList?.[index]?.title?.message}
+                        label=""
+                        required
+                        slotProps={{
+                          htmlInput: {
+                            style: {
+                              textDecoration: taskListWatch[index]?.isCompleted
+                                ? "line-through"
+                                : "none",
+                            },
+                          },
+                        }}
+                        variant="standard"
+                      />
+                    )}
+                    rules={{
+                      required: "Title is required",
+                      validate: (value) => {
+                        return Boolean(value.trim()) || "Title is required";
+                      },
+                    }}
+                  />
+                  <IconButton>
+                    <DeleteIcon onClick={() => remove(index)} />
+                  </IconButton>
+                </Stack>
+              );
+            })}
+          </CardContent>
+          <CardActions
+            sx={{
+              justifyContent: "space-between",
+              pb: theme.spacing(2),
+              px: theme.spacing(2),
+            }}
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <Button
+              onClick={() => append({ isCompleted: false, title: "" })}
+              startIcon={<AddIcon />}
+              type="button"
+              variant="contained"
+            >
+              Add task
+            </Button>
+            <Stack direction="row" spacing={1}>
+              <Button
+                onClick={() => {
+                  enqueueSnackbar(
+                    <SnackbarText>
+                      Task list has been <strong>reset</strong>
+                    </SnackbarText>,
+                    {
+                      variant: "success",
+                    },
+                  );
+                }}
+                startIcon={<RestoreIcon />}
+                type="button"
+                variant="outlined"
+              >
+                Reset
+              </Button>
+              <Button
+                startIcon={<SaveIcon />}
+                type="submit"
+                variant="contained"
+              >
+                Save
+              </Button>
+            </Stack>
+          </CardActions>
+        </form>
+      </Card>
+    </Container>
   );
 }
