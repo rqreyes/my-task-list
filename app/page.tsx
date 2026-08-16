@@ -21,19 +21,25 @@ import {
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import useSWR from "swr";
 
 import { SnackbarText } from "@/app/components/general/SnackbarText";
+import { useEffect } from "react";
+import { ErrorPage } from "@/app/components/general/ErrorPage";
+import { LoadingPage } from "@/app/components/general/LoadingPage";
 
 interface IFormValues {
   taskList: { isCompleted: boolean; title: string }[];
 }
+interface IResTaskItem {
+  completed: boolean;
+  id: number;
+  title: string;
+  userId: number;
+}
 
 const defaultValues: IFormValues = {
-  taskList: [
-    { isCompleted: false, title: "My first task" },
-    { isCompleted: true, title: "Completed task" },
-    { isCompleted: false, title: "" },
-  ],
+  taskList: [{ isCompleted: false, title: "" }],
 };
 
 export default function Home() {
@@ -43,6 +49,7 @@ export default function Home() {
     control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm({
     defaultValues,
     mode: "onBlur",
@@ -54,6 +61,43 @@ export default function Home() {
   const taskListWatch = useWatch({ control, name: "taskList" });
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
+
+  // fetching, mutation, and revalidation
+  // ------------------------------------------------------------
+  const {
+    data,
+    error,
+  }: {
+    data: IResTaskItem[];
+    error: Error | undefined;
+  } = useSWR(
+    "https://jsonplaceholder.typicode.com/users/1/todos",
+    async (url: string) => fetch(url).then((res) => res.json()),
+  );
+
+  // side effects
+  // ------------------------------------------------------------
+  useEffect(() => {
+    if (data) {
+      const taskListNew = data
+        .map((dataItem) => {
+          return {
+            isCompleted: dataItem.completed,
+            title: dataItem.title,
+          };
+        })
+        .slice(0, 6);
+
+      reset({
+        taskList: taskListNew,
+      });
+    }
+  }, [data, reset]);
+
+  // logic
+  // ------------------------------------------------------------
+  if (error) return <ErrorPage />;
+  if (!data) return <LoadingPage />;
 
   // form submission
   // ------------------------------------------------------------
@@ -89,7 +133,7 @@ export default function Home() {
       <Card>
         <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
           <CardHeader title="My Task List" sx={{ textAlign: "center" }} />
-          <CardContent>
+          <CardContent sx={{ height: "40vh", overflow: "auto" }}>
             {fields.map((field, index) => {
               return (
                 <Stack direction="row" key={field.id} spacing={1}>
@@ -110,6 +154,7 @@ export default function Home() {
                         fullWidth
                         helperText={errors.taskList?.[index]?.title?.message}
                         label=""
+                        multiline
                         required
                         slotProps={{
                           htmlInput: {
