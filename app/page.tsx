@@ -32,10 +32,9 @@ interface IFormValues {
   taskList: { isCompleted: boolean; title: string }[];
 }
 interface IResTaskItem {
-  completed: boolean;
   id: number;
+  is_completed: boolean;
   title: string;
-  userId: number;
 }
 
 const defaultValues: IFormValues = {
@@ -70,23 +69,21 @@ export default function Home() {
   }: {
     data: IResTaskItem[];
     error: Error | undefined;
-  } = useSWR(
-    "https://jsonplaceholder.typicode.com/users/1/todos",
-    async (url: string) => fetch(url).then((res) => res.json()),
+  } = useSWR("/api/tasks", async (url: string) =>
+    fetch(url).then((res) => res.json()),
   );
 
   // side effects
   // ------------------------------------------------------------
   useEffect(() => {
     if (data) {
-      const taskListNew = data
-        .map((dataItem) => {
-          return {
-            isCompleted: dataItem.completed,
-            title: dataItem.title,
-          };
-        })
-        .slice(0, 6);
+      const taskListNew = data.map((dataItem) => {
+        return {
+          id: dataItem.id,
+          isCompleted: dataItem.is_completed,
+          title: dataItem.title,
+        };
+      });
 
       reset({
         taskList: taskListNew,
