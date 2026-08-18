@@ -13,6 +13,7 @@ import {
   CardContent,
   CardHeader,
   Checkbox,
+  CircularProgress,
   Container,
   IconButton,
   Stack,
@@ -27,14 +28,19 @@ import { SnackbarText } from "@/app/components/general/SnackbarText";
 import { useEffect } from "react";
 import { ErrorPage } from "@/app/components/general/ErrorPage";
 import { LoadingPage } from "@/app/components/general/LoadingPage";
+import useSWRMutation from "swr/mutation";
+import { fetcherGet, fetcherTrigger } from "@/app/utils/fetchers";
 
 interface IFormValues {
   taskList: { isCompleted: boolean; title: string }[];
 }
 interface IResTaskItem {
   id: number;
-  is_completed: boolean;
+  isCompleted: boolean;
   title: string;
+}
+interface IResTaskList {
+  taskList: IResTaskItem[];
 }
 
 const defaultValues: IFormValues = {
@@ -67,26 +73,17 @@ export default function Home() {
     data,
     error,
   }: {
-    data: IResTaskItem[];
+    data: IResTaskList;
     error: Error | undefined;
-  } = useSWR("/api/tasks", async (url: string) =>
-    fetch(url).then((res) => res.json()),
-  );
+  } = useSWR("/api/tasks", fetcherGet);
+  const { isMutating, trigger } = useSWRMutation("/api/tasks", fetcherTrigger);
 
   // side effects
   // ------------------------------------------------------------
   useEffect(() => {
     if (data) {
-      const taskListNew = data.map((dataItem) => {
-        return {
-          id: dataItem.id,
-          isCompleted: dataItem.is_completed,
-          title: dataItem.title,
-        };
-      });
-
       reset({
-        taskList: taskListNew,
+        taskList: data.taskList,
       });
     }
   }, [data, reset]);
@@ -100,8 +97,10 @@ export default function Home() {
   // ------------------------------------------------------------
   const onSubmit = async (formValues: IFormValues) => {
     try {
-      // TODO: update database
-      console.log(formValues);
+      await trigger({
+        body: formValues,
+        method: "POST",
+      });
 
       enqueueSnackbar(
         <SnackbarText>
@@ -213,7 +212,10 @@ export default function Home() {
                 Reset
               </Button>
               <Button
-                startIcon={<SaveIcon />}
+                disabled={isMutating}
+                startIcon={
+                  isMutating ? <CircularProgress size="1rem" /> : <SaveIcon />
+                }
                 type="submit"
                 variant="contained"
               >
