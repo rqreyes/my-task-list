@@ -1,59 +1,61 @@
-import { Add as AddIcon } from "@mui/icons-material";
+import { Delete as DeleteIcon } from "@mui/icons-material";
+import { DialogContentText, Typography, useTheme } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import useSWRMutation from "swr/mutation";
 
 import { DialogContainer } from "@/app/components/general/DialogContainer";
 import { SnackbarText } from "@/app/components/general/SnackbarText";
 import { TaskDialogActions } from "@/app/components/tasks/TaskDialogActions";
-import { TaskDialogForm } from "@/app/components/tasks/TaskDialogForm";
 import {
   defaultValues,
   IFormValues,
 } from "@/app/components/tasks/TaskDialogForm";
+import { ITaskItem } from "@/app/page";
 import { fetcherTrigger } from "@/app/utils/fetchers";
 
-interface ITaskDialogCreateProps {
+interface ITaskDialogDeleteProps {
   handleDialogClose: () => void;
   isDialogOpen: boolean;
+  taskItem: ITaskItem;
 }
 
-export const TaskDialogCreate = ({
+export const TaskDialogDelete = ({
   handleDialogClose,
   isDialogOpen,
-}: ITaskDialogCreateProps) => {
+  taskItem,
+}: ITaskDialogDeleteProps) => {
   // fetching, mutation, and revalidation
   // ------------------------------------------------------------
-  const { isMutating, trigger } = useSWRMutation("/api/tasks", fetcherTrigger);
+  const { isMutating, trigger } = useSWRMutation(
+    `/api/task/${taskItem.id}`,
+    fetcherTrigger
+  );
 
   // hooks
   // ------------------------------------------------------------
-  const {
-    clearErrors,
-    control,
-    formState: { errors },
-    handleSubmit,
-    reset,
-  } = useForm({
+  const { handleSubmit, reset } = useForm({
     defaultValues,
-    mode: "onBlur",
   });
-  const isCompletedWatch = useWatch({ control, name: "isCompleted" });
+  const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
 
   // logic
   // ------------------------------------------------------------
-  const dialogActionText = "Create task";
+  const dialogActionText = "Delete task";
 
   // side effects
   // ------------------------------------------------------------
   useEffect(() => {
     if (isDialogOpen) {
-      clearErrors();
-      reset({ isCompleted: false, title: "" });
+      reset({
+        id: taskItem.id,
+        isCompleted: taskItem.isCompleted,
+        title: taskItem.title,
+      });
     }
-  }, [clearErrors, isDialogOpen, reset]);
+  }, [isDialogOpen, reset, taskItem]);
 
   // form submission
   // ------------------------------------------------------------
@@ -63,12 +65,12 @@ export const TaskDialogCreate = ({
       console.log("formValues: ", formValues);
       // await trigger({
       //   body: formValues,
-      //   method: "POST",
+      //   method: "DELETE",
       // });
 
       enqueueSnackbar(
         <SnackbarText>
-          <strong>{formValues.title}</strong> task has been added
+          <strong>{formValues.title}</strong> task has been deleted
         </SnackbarText>,
         {
           variant: "success",
@@ -100,17 +102,18 @@ export const TaskDialogCreate = ({
       isDialogOpen={isDialogOpen}
       text={dialogActionText}
     >
+      <DialogContentText sx={{ mb: theme.spacing(1) }}>
+        <Typography component="span">
+          Are you sure you want to delete <strong>{taskItem.title}</strong>{" "}
+          task?
+        </Typography>
+      </DialogContentText>
       <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-        <TaskDialogForm
-          control={control}
-          errors={errors}
-          isCompletedWatch={isCompletedWatch}
-        />
         <TaskDialogActions
           handleDialogClose={handleDialogClose}
-          errors={errors}
+          errors={{}}
           isMutating={isMutating}
-          submitIcon={<AddIcon />}
+          submitIcon={<DeleteIcon />}
           submitText={dialogActionText}
         />
       </form>

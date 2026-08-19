@@ -29,11 +29,11 @@ export const TaskDialogUpdate = ({
   // fetching, mutation, and revalidation
   // ------------------------------------------------------------
   const { isMutating, trigger } = useSWRMutation(
-    `/api/task${taskItem.id}`,
+    `/api/task/${taskItem.id}`,
     fetcherTrigger
   );
 
-  // other hooks
+  // hooks
   // ------------------------------------------------------------
   const {
     clearErrors,
@@ -50,14 +50,18 @@ export const TaskDialogUpdate = ({
 
   // logic
   // ------------------------------------------------------------
-  const dialogText = "Update task";
+  const dialogActionText = "Update task";
 
   // side effects
   // ------------------------------------------------------------
   useEffect(() => {
     if (isDialogOpen) {
       clearErrors();
-      reset({ isCompleted: taskItem.isCompleted, title: taskItem.title });
+      reset({
+        id: taskItem.id,
+        isCompleted: taskItem.isCompleted,
+        title: taskItem.title,
+      });
     }
   }, [clearErrors, isDialogOpen, reset, taskItem]);
 
@@ -104,7 +108,7 @@ export const TaskDialogUpdate = ({
     <DialogContainer
       handleDialogClose={handleDialogClose}
       isDialogOpen={isDialogOpen}
-      text={dialogText}
+      text={dialogActionText}
     >
       <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
         <TaskDialogForm
@@ -117,7 +121,7 @@ export const TaskDialogUpdate = ({
           errors={errors}
           isMutating={isMutating}
           submitIcon={<EditIcon />}
-          submitText={dialogText}
+          submitText={dialogActionText}
         />
       </form>
     </DialogContainer>

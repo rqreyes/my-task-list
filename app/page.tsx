@@ -27,6 +27,7 @@ import useSWR from "swr";
 import { ErrorPage } from "@/app/components/general/ErrorPage";
 import { LoadingPage } from "@/app/components/general/LoadingPage";
 import { TaskDialogCreate } from "@/app/components/tasks/TaskDialogCreate";
+import { TaskDialogDelete } from "@/app/components/tasks/TaskDialogDelete";
 import { TaskDialogUpdate } from "@/app/components/tasks/TaskDialogUpdate";
 import { fetcherGet } from "@/app/utils/fetchers";
 
@@ -111,7 +112,15 @@ export default function Home() {
                       />
                     </IconButton>
                     <IconButton>
-                      <DeleteIcon />
+                      <DeleteIcon
+                        onClick={() => {
+                          setDialogCurrent({
+                            dialogItem: DialogList.Delete,
+                            taskItem: { id, isCompleted, title },
+                          });
+                          setIsDialogOpen(true);
+                        }}
+                      />
                     </IconButton>
                   </ListItem>
                 );
@@ -150,6 +159,15 @@ export default function Home() {
         handleDialogClose={handleDialogClose}
         isDialogOpen={
           dialogCurrent.dialogItem === DialogList.Update && isDialogOpen
+        }
+        taskItem={dialogCurrent.taskItem}
+      />
+
+      {/* delete dialog */}
+      <TaskDialogDelete
+        handleDialogClose={handleDialogClose}
+        isDialogOpen={
+          dialogCurrent.dialogItem === DialogList.Delete && isDialogOpen
         }
         taskItem={dialogCurrent.taskItem}
       />
