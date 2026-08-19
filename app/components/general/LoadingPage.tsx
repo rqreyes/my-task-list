@@ -1,10 +1,6 @@
-import { CircularProgress, Container, useTheme } from "@mui/material";
+import { CircularProgress, Container } from "@mui/material";
 
 export const LoadingPage = () => {
-  // hooks
-  // ------------------------------------------------------------
-  const theme = useTheme();
-
   // render
   // ------------------------------------------------------------
   return (
@@ -16,7 +12,7 @@ export const LoadingPage = () => {
         justifyContent: "center",
       }}
     >
-      <CircularProgress sx={{ color: theme.palette.common.white }} />
+      <CircularProgress />
     </Container>
   );
 };

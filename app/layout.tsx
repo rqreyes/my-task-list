@@ -19,6 +19,41 @@ const theme = createTheme({
         },
       },
     },
+    MuiCircularProgress: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.palette.common.white,
+        }),
+      },
+    },
+    MuiCardContent: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          "&:last-child": { paddingBottom: theme.spacing(2) },
+        }),
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          padding: `${theme.spacing(1)} 0 0`,
+        }),
+      },
+    },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          padding: `0 ${theme.spacing(2)} ${theme.spacing(2)} ${theme.spacing(
+            2,
+          )}`,
+        }),
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: ({ theme }) => ({ padding: theme.spacing(2) }),
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         "*": { boxSizing: "border-box" },

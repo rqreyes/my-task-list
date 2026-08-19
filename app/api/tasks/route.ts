@@ -24,7 +24,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { taskList } = await request.json();
+  const { taskItem } = await request.json();
   const taskIdNew = generateId(
     `SELECT id
     FROM tasks
