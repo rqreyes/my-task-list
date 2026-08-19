@@ -1,4 +1,4 @@
-import { Edit as EditIcon, Close as CloseIcon } from "@mui/icons-material";
+import { Close as CloseIcon, Edit as EditIcon } from "@mui/icons-material";
 import {
   Button,
   Checkbox,
@@ -14,8 +14,8 @@ import useSWRMutation from "swr/mutation";
 
 import { DialogContainer } from "@/app/components/general/DialogContainer";
 import { SnackbarText } from "@/app/components/general/SnackbarText";
-import { fetcherTrigger } from "@/app/utils/fetchers";
 import { defaultValues, IFormValues, ITaskItem } from "@/app/page";
+import { fetcherTrigger } from "@/app/utils/fetchers";
 
 interface ITaskDialogUpdateProps {
   handleDialogClose: () => void;
@@ -32,7 +32,7 @@ export const TaskDialogUpdate = ({
   // ------------------------------------------------------------
   const { isMutating, trigger } = useSWRMutation(
     `/api/task${taskItem.id}`,
-    fetcherTrigger,
+    fetcherTrigger
   );
 
   // other hooks
@@ -75,7 +75,7 @@ export const TaskDialogUpdate = ({
         </SnackbarText>,
         {
           variant: "success",
-        },
+        }
       );
       handleDialogClose();
     } catch (error) {
@@ -87,7 +87,7 @@ export const TaskDialogUpdate = ({
           {
             persist: true,
             variant: "error",
-          },
+          }
         );
       }
 

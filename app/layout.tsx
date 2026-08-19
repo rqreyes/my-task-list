@@ -44,7 +44,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           padding: `0 ${theme.spacing(2)} ${theme.spacing(2)} ${theme.spacing(
-            2,
+            2
           )}`,
         }),
       },

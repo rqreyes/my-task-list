@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const { rows } = await pool.query(
       `SELECT *
-      FROM tasks`,
+      FROM tasks`
     );
     const rowsResponse = rows.map((rowItem) => {
       return {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   const taskIdNew = generateId(
     `SELECT id
     FROM tasks
-    WHERE id = $1`,
+    WHERE id = $1`
   );
 
   // TODO: add task to database
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
         message: "Created",
         statusCode: 201,
       },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (error) {
     console.error("Database query error:", error);

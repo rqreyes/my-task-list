@@ -19,16 +19,16 @@ import {
   useTheme,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
+import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import useSWR from "swr";
+import useSWRMutation from "swr/mutation";
 
-import { SnackbarText } from "@/app/components/general/SnackbarText";
-import { useState } from "react";
 import { ErrorPage } from "@/app/components/general/ErrorPage";
 import { LoadingPage } from "@/app/components/general/LoadingPage";
+import { SnackbarText } from "@/app/components/general/SnackbarText";
+import { TaskDialogUpdate } from "@/app/components/tasks/TaskDialogUpdate";
 import { fetcherGet, fetcherTrigger } from "@/app/utils/fetchers";
-import { TaskDialogUpdate } from "@/app/TaskDialogUpdate";
-import useSWRMutation from "swr/mutation";
 
 enum DialogList {
   Delete,
@@ -115,7 +115,7 @@ export default function Home() {
         </SnackbarText>,
         {
           variant: "success",
-        },
+        }
       );
       reset({ isCompleted: false, title: "" });
     } catch (error) {
