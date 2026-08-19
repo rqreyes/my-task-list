@@ -131,7 +131,7 @@ export default function Home() {
               startIcon={<AddIcon />}
               variant="contained"
             >
-              Add task
+              Create task
             </Button>
           </CardActions>
         </Card>

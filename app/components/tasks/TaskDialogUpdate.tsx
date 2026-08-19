@@ -6,6 +6,7 @@ import useSWRMutation from "swr/mutation";
 
 import { DialogContainer } from "@/app/components/general/DialogContainer";
 import { SnackbarText } from "@/app/components/general/SnackbarText";
+import { TaskDialogActions } from "@/app/components/tasks/TaskDialogActions";
 import { TaskDialogForm } from "@/app/components/tasks/TaskDialogForm";
 import {
   defaultValues,
@@ -46,6 +47,10 @@ export const TaskDialogUpdate = ({
   });
   const isCompletedWatch = useWatch({ control, name: "isCompleted" });
   const { enqueueSnackbar } = useSnackbar();
+
+  // logic
+  // ------------------------------------------------------------
+  const dialogText = "Update task";
 
   // side effects
   // ------------------------------------------------------------
@@ -99,18 +104,20 @@ export const TaskDialogUpdate = ({
     <DialogContainer
       handleDialogClose={handleDialogClose}
       isDialogOpen={isDialogOpen}
-      text="Update task"
+      text={dialogText}
     >
       <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
         <TaskDialogForm
           control={control}
           errors={errors}
-          handleDialogClose={handleDialogClose}
           isCompletedWatch={isCompletedWatch}
+        />
+        <TaskDialogActions
+          handleDialogClose={handleDialogClose}
+          errors={errors}
           isMutating={isMutating}
-          isSubmitDisabled={Object.keys(errors).length > 0 || isMutating}
           submitIcon={<EditIcon />}
-          submitText="Update task"
+          submitText={dialogText}
         />
       </form>
     </DialogContainer>
