@@ -26,10 +26,27 @@ const theme = createTheme({
         }),
       },
     },
+    MuiCardActions: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          justifyContent: "flex-end",
+          padding: theme.spacing(2),
+        }),
+      },
+    },
     MuiCardContent: {
       styleOverrides: {
         root: ({ theme }) => ({
           "&:last-child": { paddingBottom: theme.spacing(2) },
+          height: "40vh",
+          overflow: "auto",
+        }),
+      },
+    },
+    MuiCardHeader: {
+      styleOverrides: {
+        root: () => ({
+          textAlign: "center",
         }),
       },
     },

@@ -2,64 +2,54 @@
 
 import {
   Add as AddIcon,
+  CheckBox as CheckBoxIcon,
+  CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
 } from "@mui/icons-material";
 import {
   Button,
   Card,
+  CardActions,
   CardContent,
   CardHeader,
-  Checkbox,
-  CircularProgress,
   Container,
+  Divider,
   IconButton,
-  Stack,
-  TextField,
-  useTheme,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
-import { useSnackbar } from "notistack";
 import { useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
 import useSWR from "swr";
-import useSWRMutation from "swr/mutation";
 
 import { ErrorPage } from "@/app/components/general/ErrorPage";
 import { LoadingPage } from "@/app/components/general/LoadingPage";
-import { SnackbarText } from "@/app/components/general/SnackbarText";
+import { TaskDialogCreate } from "@/app/components/tasks/TaskDialogCreate";
 import { TaskDialogUpdate } from "@/app/components/tasks/TaskDialogUpdate";
-import { fetcherGet, fetcherTrigger } from "@/app/utils/fetchers";
+import { fetcherGet } from "@/app/utils/fetchers";
 
 enum DialogList {
+  Create,
   Delete,
   Update,
-}
-export interface IFormValues {
-  id: number;
-  isCompleted: boolean;
-  title: string;
 }
 export interface ITaskItem {
   id: number;
   isCompleted: boolean;
   title: string;
 }
-export interface IResTaskList {
+export interface ITaskList {
   taskList: ITaskItem[];
 }
-
-export const defaultValues: IFormValues = {
-  id: 0,
-  isCompleted: false,
-  title: "",
-};
 
 export default function Home() {
   // state
   // ------------------------------------------------------------
   const [dialogCurrent, setDialogCurrent] = useState({
     dialogItem: 0,
-    task: {
+    taskItem: {
       id: 0,
       isCompleted: false,
       title: "",
@@ -67,189 +57,101 @@ export default function Home() {
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // hooks
-  // ------------------------------------------------------------
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm({
-    defaultValues,
-    mode: "onBlur",
-  });
-  const IsCompletedWatch = useWatch({ control, name: "isCompleted" });
-  const { enqueueSnackbar } = useSnackbar();
-  const theme = useTheme();
-
   // fetching, mutation, and revalidation
   // ------------------------------------------------------------
   const {
     data,
     error,
   }: {
-    data: IResTaskList;
+    data: ITaskList;
     error: Error | undefined;
   } = useSWR("/api/tasks", fetcherGet);
-  const { isMutating, trigger } = useSWRMutation("/api/tasks", fetcherTrigger);
 
   // logic
   // ------------------------------------------------------------
   if (error) return <ErrorPage />;
   if (!data) return <LoadingPage />;
 
-  // form submission
-  // ------------------------------------------------------------
-  const onSubmit = async (formValues: IFormValues) => {
-    try {
-      // TODO: update database
-      console.log("formValues: ", formValues);
-      // await trigger({
-      //   body: formValues,
-      //   method: "POST",
-      // });
-
-      enqueueSnackbar(
-        <SnackbarText>
-          Task list has been <strong>added</strong>
-        </SnackbarText>,
-        {
-          variant: "success",
-        }
-      );
-      reset({ isCompleted: false, title: "" });
-    } catch (error) {
-      if (error instanceof Error) {
-        enqueueSnackbar(<strong>{error.message}</strong>, {
-          persist: true,
-          variant: "error",
-        });
-      }
-
-      throw error;
-    }
-  };
+  const handleDialogClose = () => setIsDialogOpen(false);
 
   // render
   // ------------------------------------------------------------
   return (
     <>
-      <Container
-        component="main"
-        maxWidth="sm"
-        sx={{ display: "flex", flexDirection: "column", gap: theme.spacing(2) }}
-      >
+      <Container component="main" maxWidth="sm">
         <Card>
-          <CardHeader title="My Task List" sx={{ textAlign: "center" }} />
-          <CardContent
-            sx={{ height: "40vh", overflow: "auto", pl: theme.spacing(4) }}
-          >
-            {data.taskList.map(({ id, isCompleted, title }) => {
-              return (
-                <Stack direction="row" key={id} spacing={1}>
-                  <TextField
-                    defaultValue={title}
-                    fullWidth
-                    multiline
-                    slotProps={{
-                      htmlInput: {
-                        readOnly: true,
-                        style: {
-                          textDecoration: isCompleted ? "line-through" : "none",
-                        },
-                      },
-                    }}
-                    variant="standard"
-                  />
-                  <IconButton>
-                    <EditIcon
-                      onClick={() => {
-                        setDialogCurrent({
-                          dialogItem: DialogList.Update,
-                          task: { id, isCompleted, title },
-                        });
-                        setIsDialogOpen(true);
-                      }}
-                    />
-                  </IconButton>
-                  <IconButton>
-                    <DeleteIcon />
-                  </IconButton>
-                </Stack>
-              );
-            })}
-          </CardContent>
-        </Card>
-        <Card>
+          <CardHeader title="My Task List" />
           <CardContent>
-            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-              <Stack direction="row" spacing={1}>
-                <Controller
-                  control={control}
-                  name="isCompleted"
-                  render={({ field: { value, ...field } }) => (
-                    <Checkbox {...field} checked={value} />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="title"
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      error={Boolean(errors.title)}
-                      fullWidth
-                      helperText={errors.title?.message}
-                      label=""
-                      multiline
-                      required
-                      slotProps={{
-                        htmlInput: {
-                          style: {
-                            textDecoration: IsCompletedWatch
-                              ? "line-through"
-                              : "none",
-                          },
-                        },
+            <List>
+              {data.taskList.map(({ id, isCompleted, title }) => {
+                return (
+                  <ListItem disablePadding key={id}>
+                    <ListItemIcon>
+                      {isCompleted ? (
+                        <CheckBoxIcon />
+                      ) : (
+                        <CheckBoxOutlineBlankIcon />
+                      )}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={title}
+                      sx={{
+                        textDecoration: isCompleted ? "line-through" : "none",
                       }}
-                      variant="standard"
                     />
-                  )}
-                  rules={{
-                    required: "Title is required",
-                    validate: (value) => {
-                      return Boolean(value.trim()) || "Title is required";
-                    },
-                  }}
-                />
-              </Stack>
-              <Stack
-                direction="row"
-                sx={{ justifyContent: "flex-end", mt: theme.spacing(1) }}
-              >
-                <Button
-                  disabled={Object.keys(errors).length > 0 || isMutating}
-                  startIcon={
-                    isMutating ? <CircularProgress size="1rem" /> : <AddIcon />
-                  }
-                  type="submit"
-                  variant="contained"
-                >
-                  Add task
-                </Button>
-              </Stack>
-            </form>
+                    <IconButton>
+                      <EditIcon
+                        onClick={() => {
+                          setDialogCurrent({
+                            dialogItem: DialogList.Update,
+                            taskItem: { id, isCompleted, title },
+                          });
+                          setIsDialogOpen(true);
+                        }}
+                      />
+                    </IconButton>
+                    <IconButton>
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItem>
+                );
+              })}
+            </List>
           </CardContent>
+          <Divider variant="middle" />
+          <CardActions>
+            <Button
+              onClick={() => {
+                setDialogCurrent({
+                  dialogItem: DialogList.Create,
+                  taskItem: { id: 0, isCompleted: false, title: "" },
+                });
+                setIsDialogOpen(true);
+              }}
+              startIcon={<AddIcon />}
+              variant="contained"
+            >
+              Add task
+            </Button>
+          </CardActions>
         </Card>
       </Container>
 
+      {/* create dialog */}
+      <TaskDialogCreate
+        handleDialogClose={handleDialogClose}
+        isDialogOpen={
+          dialogCurrent.dialogItem === DialogList.Create && isDialogOpen
+        }
+      />
+
       {/* update dialog */}
       <TaskDialogUpdate
-        handleDialogClose={() => setIsDialogOpen(false)}
+        handleDialogClose={handleDialogClose}
         isDialogOpen={
           dialogCurrent.dialogItem === DialogList.Update && isDialogOpen
         }
-        taskItem={dialogCurrent.task}
+        taskItem={dialogCurrent.taskItem}
       />
     </>
   );

@@ -1,4 +1,4 @@
-import { Edit as EditIcon } from "@mui/icons-material";
+import { Add as AddIcon } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -11,26 +11,20 @@ import {
   defaultValues,
   IFormValues,
 } from "@/app/components/tasks/TaskDialogForm";
-import { ITaskItem } from "@/app/page";
 import { fetcherTrigger } from "@/app/utils/fetchers";
 
-interface ITaskDialogUpdateProps {
+interface ITaskDialogCreateProps {
   handleDialogClose: () => void;
   isDialogOpen: boolean;
-  taskItem: ITaskItem;
 }
 
-export const TaskDialogUpdate = ({
+export const TaskDialogCreate = ({
   handleDialogClose,
   isDialogOpen,
-  taskItem,
-}: ITaskDialogUpdateProps) => {
+}: ITaskDialogCreateProps) => {
   // fetching, mutation, and revalidation
   // ------------------------------------------------------------
-  const { isMutating, trigger } = useSWRMutation(
-    `/api/task${taskItem.id}`,
-    fetcherTrigger
-  );
+  const { isMutating, trigger } = useSWRMutation("/api/tasks", fetcherTrigger);
 
   // other hooks
   // ------------------------------------------------------------
@@ -52,9 +46,9 @@ export const TaskDialogUpdate = ({
   useEffect(() => {
     if (isDialogOpen) {
       clearErrors();
-      reset({ isCompleted: taskItem.isCompleted, title: taskItem.title });
+      reset({ isCompleted: false, title: "" });
     }
-  }, [clearErrors, isDialogOpen, reset, taskItem]);
+  }, [clearErrors, isDialogOpen, reset]);
 
   // form submission
   // ------------------------------------------------------------
@@ -64,12 +58,12 @@ export const TaskDialogUpdate = ({
       console.log("formValues: ", formValues);
       // await trigger({
       //   body: formValues,
-      //   method: "PATCH",
+      //   method: "POST",
       // });
 
       enqueueSnackbar(
         <SnackbarText>
-          <strong>{formValues.title}</strong> task has been updated
+          <strong>{formValues.title}</strong> task has been added
         </SnackbarText>,
         {
           variant: "success",
@@ -99,7 +93,7 @@ export const TaskDialogUpdate = ({
     <DialogContainer
       handleDialogClose={handleDialogClose}
       isDialogOpen={isDialogOpen}
-      text="Update task"
+      text="Add task"
     >
       <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
         <TaskDialogForm
@@ -109,8 +103,8 @@ export const TaskDialogUpdate = ({
           isCompletedWatch={isCompletedWatch}
           isMutating={isMutating}
           isSubmitDisabled={Object.keys(errors).length > 0 || isMutating}
-          submitIcon={<EditIcon />}
-          submitText="Update task"
+          submitIcon={<AddIcon />}
+          submitText="Add task"
         />
       </form>
     </DialogContainer>
