@@ -1,5 +1,6 @@
--- create database
+-- create table
 -- ------------------------------------------------------------
+DROP TABLE IF EXISTS tasks;
 CREATE TABLE tasks (
   id bigint GENERATED ALWAYS AS IDENTITY,
   is_completed BOOLEAN DEFAULT FALSE,
@@ -9,6 +10,8 @@ CREATE TABLE tasks (
 -- add data
 -- ------------------------------------------------------------
 INSERT INTO tasks (is_completed, title) VALUES
-(DEFAULT, 'Hello world'),
-(DEFAULT, 'My first task'),
-(TRUE, 'My completed task');
+(TRUE, 'Update resume'),
+(TRUE, 'Develop task list application'),
+(DEFAULT, 'Apply to jobs'),
+(DEFAULT, 'Get a job'),
+(DEFAULT, 'Take over the world');

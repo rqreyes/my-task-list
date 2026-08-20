@@ -1,4 +1,5 @@
 import { pool } from "@/app/lib/database";
+import { IDataTaskItem } from "@/app/types/tasks";
 
 // get
 // ------------------------------------------------------------
@@ -6,17 +7,11 @@ export async function GET() {
   try {
     const { rows } = await pool.query(
       `SELECT *
-      FROM tasks`
+      FROM tasks
+      ORDER BY id`
     );
-    const rowsResponse = rows.map((rowItem) => {
-      return {
-        id: rowItem.id,
-        isCompleted: rowItem.is_completed,
-        title: rowItem.title,
-      };
-    });
 
-    return Response.json({ taskList: rowsResponse }, { status: 200 });
+    return Response.json(rows, { status: 200 });
   } catch (error) {
     console.error("Database query error:", error);
 
@@ -27,15 +22,13 @@ export async function GET() {
 // post
 // ------------------------------------------------------------
 export async function POST(request: Request) {
-  const {
-    taskItem: { isCompleted, title },
-  } = await request.json();
+  const { is_completed, title }: IDataTaskItem = await request.json();
 
   try {
     await pool.query(
       `INSERT INTO tasks (is_completed, title)
       VALUES ($1, $2)`,
-      [isCompleted, title]
+      [is_completed, title]
     );
 
     return Response.json(

@@ -12,6 +12,7 @@ import {
   defaultValues,
   IFormValues,
 } from "@/app/components/tasks/TaskDialogForm";
+import { IDataTaskItem } from "@/app/types/tasks";
 import { fetcherTrigger } from "@/app/utils/fetchers";
 
 interface ITaskDialogCreateProps {
@@ -57,16 +58,23 @@ export const TaskDialogCreate = ({
 
   // form submission
   // ------------------------------------------------------------
-  const onSubmit = async (formValues: IFormValues) => {
+  const onSubmit = async ({ id, isCompleted, title }: IFormValues) => {
     try {
+      const body: IDataTaskItem = {
+        id,
+        is_completed: isCompleted,
+        title,
+      };
+
+      // update database
       await trigger({
-        body: { taskItem: formValues },
+        body,
         method: "POST",
       });
 
       enqueueSnackbar(
         <SnackbarText>
-          <strong>{formValues.title}</strong> task has been added
+          <strong>{title}</strong> task has been added
         </SnackbarText>,
         {
           variant: "success",

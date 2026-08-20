@@ -2,6 +2,7 @@ import { Edit as EditIcon } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { mutate } from "swr";
 import useSWRMutation from "swr/mutation";
 
 import { DialogContainer } from "@/app/components/general/DialogContainer";
@@ -13,6 +14,7 @@ import {
   IFormValues,
 } from "@/app/components/tasks/TaskDialogForm";
 import { ITaskItem } from "@/app/page";
+import { IDataTaskItem } from "@/app/types/tasks";
 import { fetcherTrigger } from "@/app/utils/fetchers";
 
 interface ITaskDialogUpdateProps {
@@ -67,18 +69,25 @@ export const TaskDialogUpdate = ({
 
   // form submission
   // ------------------------------------------------------------
-  const onSubmit = async (formValues: IFormValues) => {
+  const onSubmit = async ({ id, isCompleted, title }: IFormValues) => {
+    const body: IDataTaskItem = {
+      id,
+      is_completed: isCompleted,
+      title,
+    };
+
     try {
-      // TODO: update database
-      console.log("formValues: ", formValues);
-      // await trigger({
-      //   body: formValues,
-      //   method: "PATCH",
-      // });
+      // update database
+      await trigger({
+        body,
+        method: "PATCH",
+      });
+      // update UI
+      mutate("/api/tasks");
 
       enqueueSnackbar(
         <SnackbarText>
-          <strong>{formValues.title}</strong> task has been updated
+          <strong>{title}</strong> task has been updated
         </SnackbarText>,
         {
           variant: "success",

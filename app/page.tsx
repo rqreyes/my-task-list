@@ -29,6 +29,7 @@ import { LoadingPage } from "@/app/components/general/LoadingPage";
 import { TaskDialogCreate } from "@/app/components/tasks/TaskDialogCreate";
 import { TaskDialogDelete } from "@/app/components/tasks/TaskDialogDelete";
 import { TaskDialogUpdate } from "@/app/components/tasks/TaskDialogUpdate";
+import { IDataTaskItem } from "@/app/types/tasks";
 import { fetcherGet } from "@/app/utils/fetchers";
 
 enum DialogList {
@@ -40,9 +41,6 @@ export interface ITaskItem {
   id: number;
   isCompleted: boolean;
   title: string;
-}
-export interface ITaskList {
-  taskList: ITaskItem[];
 }
 
 export default function Home() {
@@ -64,7 +62,7 @@ export default function Home() {
     data,
     error,
   }: {
-    data: ITaskList;
+    data: IDataTaskItem[];
     error: Error | undefined;
   } = useSWR("/api/tasks", fetcherGet);
 
@@ -74,6 +72,13 @@ export default function Home() {
   if (!data) return <LoadingPage />;
 
   const handleDialogClose = () => setIsDialogOpen(false);
+  const dataTaskList = data.map(({ id, is_completed, title }) => {
+    return {
+      id,
+      isCompleted: is_completed,
+      title,
+    };
+  });
 
   // render
   // ------------------------------------------------------------
@@ -84,7 +89,7 @@ export default function Home() {
           <CardHeader title="My Task List" />
           <CardContent>
             <List>
-              {data.taskList.map(({ id, isCompleted, title }) => {
+              {dataTaskList.map(({ id, isCompleted, title }) => {
                 return (
                   <ListItem disablePadding key={id}>
                     <ListItemIcon>
