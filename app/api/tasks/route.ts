@@ -1,6 +1,7 @@
 import { pool } from "@/app/lib/database";
-import { generateId } from "@/app/utils/generateId";
 
+// get
+// ------------------------------------------------------------
 export async function GET() {
   try {
     const { rows } = await pool.query(
@@ -19,21 +20,24 @@ export async function GET() {
   } catch (error) {
     console.error("Database query error:", error);
 
-    return Response.json({ error: "Failed to get tasks" }, { status: 500 });
+    return Response.json({ error: "Failed to fetch tasks" }, { status: 500 });
   }
 }
 
+// post
+// ------------------------------------------------------------
 export async function POST(request: Request) {
-  const { taskItem } = await request.json();
-  const taskIdNew = generateId(
-    `SELECT id
-    FROM tasks
-    WHERE id = $1`
-  );
-
-  // TODO: add task to database
+  const {
+    taskItem: { isCompleted, title },
+  } = await request.json();
 
   try {
+    await pool.query(
+      `INSERT INTO tasks (is_completed, title)
+      VALUES ($1, $2)`,
+      [isCompleted, title]
+    );
+
     return Response.json(
       {
         message: "Created",
@@ -44,6 +48,6 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Database query error:", error);
 
-    return Response.json({ error: "Failed to post tasks" }, { status: 500 });
+    return Response.json({ error: "Failed to create task" }, { status: 500 });
   }
 }

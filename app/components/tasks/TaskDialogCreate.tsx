@@ -51,7 +51,7 @@ export const TaskDialogCreate = ({
   useEffect(() => {
     if (isDialogOpen) {
       clearErrors();
-      reset({ isCompleted: false, title: "" });
+      reset({ id: 0, isCompleted: false, title: "" });
     }
   }, [clearErrors, isDialogOpen, reset]);
 
@@ -59,12 +59,10 @@ export const TaskDialogCreate = ({
   // ------------------------------------------------------------
   const onSubmit = async (formValues: IFormValues) => {
     try {
-      // TODO: update database
-      console.log("formValues: ", formValues);
-      // await trigger({
-      //   body: formValues,
-      //   method: "POST",
-      // });
+      await trigger({
+        body: { taskItem: formValues },
+        method: "POST",
+      });
 
       enqueueSnackbar(
         <SnackbarText>
