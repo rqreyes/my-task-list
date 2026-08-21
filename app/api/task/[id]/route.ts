@@ -1,9 +1,9 @@
 import { pool } from "@/app/lib/database";
 import { IDataTaskItem } from "@/app/types/tasks";
 
-// patch
+// PUT
 // ------------------------------------------------------------
-export async function PATCH(request: Request) {
+export async function PUT(request: Request) {
   const { id, is_completed, title }: IDataTaskItem = await request.json();
 
   try {

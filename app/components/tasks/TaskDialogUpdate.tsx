@@ -80,7 +80,7 @@ export const TaskDialogUpdate = ({
       // update database
       await trigger({
         body,
-        method: "PATCH",
+        method: "PUT",
       });
       // update UI
       mutate("/api/tasks");
