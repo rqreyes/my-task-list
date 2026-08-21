@@ -12,6 +12,7 @@ import {
   defaultValues,
   IFormValues,
 } from "@/app/components/tasks/TaskDialogForm";
+import { checkResponseError } from "@/app/types/checkResponseError";
 import { IDataTaskItem } from "@/app/types/tasks";
 import { fetcherTrigger } from "@/app/utils/fetchers";
 
@@ -59,18 +60,21 @@ export const TaskDialogCreate = ({
   // form submission
   // ------------------------------------------------------------
   const onSubmit = async ({ id, isCompleted, title }: IFormValues) => {
-    try {
-      const body: IDataTaskItem = {
-        id,
-        is_completed: isCompleted,
-        title,
-      };
+    const body: IDataTaskItem = {
+      id,
+      is_completed: isCompleted,
+      title,
+    };
 
+    try {
       // update database
-      await trigger({
+      const response = await trigger({
         body,
         method: "POST",
       });
+
+      // check if response is an error
+      checkResponseError(response);
 
       enqueueSnackbar(
         <SnackbarText>

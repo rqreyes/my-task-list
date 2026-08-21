@@ -11,6 +11,7 @@ export async function GET() {
       ORDER BY id`
     );
 
+    // send response
     return Response.json(rows, { status: 200 });
   } catch (error) {
     console.error("Database query error:", error);
@@ -24,13 +25,20 @@ export async function GET() {
 export async function POST(request: Request) {
   const { is_completed, title }: IDataTaskItem = await request.json();
 
+  // check if title is empty
+  if (title === "") {
+    return Response.json({ error: "Title is required" }, { status: 400 });
+  }
+
   try {
+    // update database
     await pool.query(
       `INSERT INTO tasks (is_completed, title)
       VALUES ($1, $2)`,
       [is_completed, title]
     );
 
+    // send response
     return Response.json(
       {
         message: "Created",

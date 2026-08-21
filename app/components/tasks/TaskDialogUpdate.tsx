@@ -14,6 +14,7 @@ import {
   IFormValues,
 } from "@/app/components/tasks/TaskDialogForm";
 import { ITaskItem } from "@/app/page";
+import { checkResponseError } from "@/app/types/checkResponseError";
 import { IDataTaskItem } from "@/app/types/tasks";
 import { fetcherTrigger } from "@/app/utils/fetchers";
 
@@ -78,10 +79,14 @@ export const TaskDialogUpdate = ({
 
     try {
       // update database
-      await trigger({
+      const response = await trigger({
         body,
         method: "PUT",
       });
+
+      // check if response is an error
+      checkResponseError(response);
+
       // update UI
       mutate("/api/tasks");
 

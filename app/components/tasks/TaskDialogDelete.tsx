@@ -14,6 +14,7 @@ import {
   IFormValues,
 } from "@/app/components/tasks/TaskDialogForm";
 import { ITaskItem } from "@/app/page";
+import { checkResponseError } from "@/app/types/checkResponseError";
 import { fetcherTrigger } from "@/app/utils/fetchers";
 
 interface ITaskDialogDeleteProps {
@@ -67,10 +68,14 @@ export const TaskDialogDelete = ({
 
     try {
       // update database
-      await trigger({
+      const response = await trigger({
         body,
         method: "DELETE",
       });
+
+      // check if response is an error
+      checkResponseError(response);
+
       // update UI
       mutate("/api/tasks");
 
